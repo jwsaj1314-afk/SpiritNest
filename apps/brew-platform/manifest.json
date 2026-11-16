@@ -1,0 +1,26 @@
+{
+  "sdkVersion": "1.0",
+  "id": "ai.brew.platform",
+  "name": "独家特调",
+  "version": "1.0.0",
+  "author": "工坊",
+  "description": "调酒式 AI 创作平台：选角色、写配方、调出专属对话风格，支持多轮对话并可发送到聊天室。",
+  "icon": "icon.png",
+  "entry": "index.html",
+  "permissions": [
+    "app.data.read",
+    "app.data.write",
+    "characters.read",
+    "ai.generate",
+    "chat.sendCard",
+    "chat.write",
+    "chat.requestReply",
+    "user.profile.read",
+    "memory.write",
+    "ui.toast",
+    "ui.notification"
+  ],
+  "resources": {
+    "presets": ["presets.json"]
+  }
+}

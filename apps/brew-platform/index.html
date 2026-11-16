@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>独家特调</title>
+<style>
+:root {
+  --bg:        #fbf8e7;
+  --bg2:       #E8E2D9;
+  --bg3:       #D4C8BB;
+  --soft:      #FFE2D5;
+  --accent:    #FFB88A;
+  --blue-lt:   #dff1fb;
+  --blue:      #a5d0f2;
+  --blue-dk:   #95c2e3;
+  --purple-lt: #F7F3FF;
+  --purple:    #EDE4FF;
+  --purple-md: #D8C8FF;
+  --purple-dk: #B89AFF;
+  --ink:       #2B2633;
+  --ink-mid:   #554860;
+  --ink-lt:    #A894A6;
+  --card-bg:   #fffdf6;
+  --radius:    18px;
+  --radius-sm: 10px;
+  --shadow:    0 4px 24px rgba(43,38,51,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;color:var(--ink);}
+
+/* ── 顶栏 ── */
+.topbar{
+  position:fixed;
+  top:var(--ai-phone-app-bar-top,56px);
+  left:0;right:var(--ai-phone-app-bar-clear-right,96px);
+  height:44px;
+  display:flex;align-items:center;gap:10px;
+  padding:0 16px;
+  z-index:100;
+}
+.topbar-title{
+  font-size:17px;font-weight:700;color:var(--ink);
+  background:linear-gradient(135deg,var(--purple-dk),var(--blue-dk));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:.5px;
+}
+.topbar-tab{
+  margin-left:auto;
+  display:flex;gap:4px;
+  background:var(--bg2);
+  border-radius:20px;
+  padding:3px;
+}
+.topbar-tab button{
+  border:none;background:none;cursor:pointer;
+  padding:4px 12px;border-radius:16px;
+  font-size:13px;color:var(--ink-mid);
+  min-height:28px;transition:all .2s;
+}
+.topbar-tab button.active{
+  background:var(--card-bg);
+  color:var(--ink);font-weight:600;
+  box-shadow:0 1px 6px rgba(43,38,51,0.10);
+}
+
+/* ── 主布局 ── */
+.app{
+  min-height:100dvh;
+  padding-top:calc(var(--ai-phone-app-bar-top,56px) + 56px);
+  padding-bottom:calc(var(--ai-phone-app-safe-bottom,24px) + 72px);
+  padding-left:0;padding-right:0;
+}
+
+/* ── 页面切换 ── */
+.page{display:none;padding:0 16px;}
+.page.active{display:block;}
+
+/* ════════════════════════════════
+   配方页
+════════════════════════════════ */
+.section-label{
+  font-size:11px;font-weight:600;letter-spacing:1px;
+  color:var(--ink-lt);text-transform:uppercase;
+  margin:18px 0 8px;
+}
+
+/* 角色选择 */
+.char-row{
+  display:flex;gap:8px;overflow-x:auto;
+  padding-bottom:4px;
+  scrollbar-width:none;
+}
+.char-row::-webkit-scrollbar{display:none;}
+.char-chip{
+  flex:0 0 auto;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:8px 10px;
+  background:var(--card-bg);
+  border:2px solid transparent;
+  border-radius:14px;
+  cursor:pointer;transition:all .2s;
+  box-shadow:var(--shadow);
+  min-width:68px;
+}
+.char-chip.selected{border-color:var(--purple-dk);background:var(--purple-lt);}
+.char-avatar{
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,var(--purple-md),var(--blue));
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;overflow:hidden;
+}
+.char-avatar img{width:100%;height:100%;object-fit:cover;}
+.char-name{font-size:11px;color:var(--ink-mid);font-weight:500;max-width:60px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* 配方卡 */
+.recipe-card{
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  padding:14px;
+  box-shadow:var(--shadow);
+  margin-bottom:10px;
+  border:1.5px solid var(--bg2);
+}
+.recipe-card textarea{
+  width:100%;border:none;background:none;
+  resize:none;outline:none;
+  font-size:14px;line-height:1.65;color:var(--ink);
+  min-height:80px;
+}
+.recipe-card textarea::placeholder{color:var(--ink-lt);}
+.recipe-actions{
+  display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;
+}
+.btn-sm{
+  border:none;cursor:pointer;border-radius:20px;
+  padding:6px 14px;font-size:12px;font-weight:500;
+  min-height:30px;transition:all .2s;
+}
+.btn-ghost{background:var(--bg2);color:var(--ink-mid);}
+.btn-ghost:hover{background:var(--bg3);}
+.btn-primary{
+  background:linear-gradient(135deg,var(--purple-dk),var(--blue-dk));
+  color:#fff;
+}
+.btn-primary:active{opacity:.85;}
+.btn-accent{background:var(--soft);color:var(--ink);}
+
+/* 保存的配方列表 */
+.saved-list{display:flex;flex-direction:column;gap:8px;}
+.saved-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--card-bg);border-radius:var(--radius-sm);
+  padding:10px 12px;cursor:pointer;
+  border:1.5px solid var(--bg2);
+  box-shadow:0 2px 8px rgba(43,38,51,0.05);
+  transition:border-color .2s;
+}
+.saved-item.active-recipe{border-color:var(--purple-dk);}
+.saved-item-dot{
+  width:10px;height:10px;border-radius:50%;flex:0 0 10px;
+  background:linear-gradient(135deg,var(--purple-md),var(--blue));
+}
+.saved-item-text{flex:1;font-size:13px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.saved-item-del{
+  border:none;background:none;cursor:pointer;
+  color:var(--ink-lt);font-size:16px;padding:4px;line-height:1;
+}
+
+/* ════════════════════════════════
+   对话页
+════════════════════════════════ */
+.chat-wrap{
+  display:flex;flex-direction:column;
+  gap:0;
+}
+
+/* 状态条 */
+.brew-status{
+  display:flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,var(--purple-lt),var(--blue-lt));
+  border-radius:var(--radius-sm);
+  padding:8px 12px;margin-bottom:12px;
+  border:1px solid var(--purple-md);
+}
+.brew-status-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--purple-dk);flex:0 0 7px;
+}
+.brew-status-text{font-size:12px;color:var(--ink-mid);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.brew-status-btn{
+  border:none;background:none;cursor:pointer;
+  font-size:12px;color:var(--blue-dk);font-weight:600;
+  padding:0;min-height:auto;
+}
+
+/* 气泡 */
+.messages{
+  display:flex;flex-direction:column;gap:12px;
+  min-height:240px;
+}
+.bubble-row{display:flex;gap:8px;align-items:flex-end;}
+.bubble-row.user{flex-direction:row-reverse;}
+.bubble-avatar{
+  width:32px;height:32px;border-radius:50%;flex:0 0 32px;
+  background:linear-gradient(135deg,var(--purple-md),var(--blue));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;overflow:hidden;
+}
+.bubble-avatar img{width:100%;height:100%;object-fit:cover;}
+.bubble-avatar.user-av{
+  background:linear-gradient(135deg,var(--soft),var(--accent));
+  font-size:14px;
+}
+.bubble{
+  max-width:72%;
+  padding:10px 14px;
+  border-radius:18px;
+  font-size:14px;line-height:1.65;
+  word-break:break-word;
+}
+.bubble.char{
+  background:var(--card-bg);
+  color:var(--ink);
+  border-bottom-left-radius:4px;
+  box-shadow:0 2px 10px rgba(43,38,51,0.07);
+}
+.bubble.user{
+  background:linear-gradient(135deg,var(--purple-md),var(--blue));
+  color:var(--ink);
+  border-bottom-right-radius:4px;
+}
+.bubble.system{
+  background:var(--bg2);color:var(--ink-mid);
+  font-size:12px;border-radius:var(--radius-sm);
+  max-width:90%;align-self:center;text-align:center;
+  box-shadow:none;padding:7px 14px;
+}
+.bubble-time{font-size:10px;color:var(--ink-lt);margin-top:3px;padding:0 4px;}
+
+/* 打字中 */
+.typing-dot{display:inline-flex;gap:3px;padding:4px 2px;}
+.typing-dot span{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--ink-lt);
+  animation:bounce .9s infinite;
+}
+.typing-dot span:nth-child(2){animation-delay:.2s;}
+.typing-dot span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-5px);}}
+
+/* 底部输入区 */
+.chat-input-bar{
+  position:fixed;
+  bottom:var(--ai-phone-app-safe-bottom,24px);
+  left:0;right:0;
+  padding:8px 16px;
+  background:linear-gradient(to top,var(--bg) 70%,transparent);
+}
+.chat-input-inner{
+  display:flex;gap:8px;align-items:flex-end;
+  background:var(--card-bg);
+  border-radius:24px;
+  padding:6px 6px 6px 14px;
+  box-shadow:0 4px 20px rgba(43,38,51,0.10);
+  border:1.5px solid var(--bg2);
+}
+.chat-input-inner textarea{
+  flex:1;border:none;background:none;
+  resize:none;outline:none;
+  font-size:14px;line-height:1.5;color:var(--ink);
+  max-height:100px;min-height:24px;
+  padding:3px 0;
+}
+.chat-input-inner textarea::placeholder{color:var(--ink-lt);}
+.send-btn{
+  width:36px;height:36px;border-radius:50%;
+  border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--purple-dk),var(--blue-dk));
+  color:#fff;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  flex:0 0 36px;transition:opacity .2s;
+}
+.send-btn:disabled{opacity:.4;}
+
+/* 对话底部操作 */
+.chat-actions-bar{
+  display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;
+}
+
+/* ════════════════════════════════
+   记录页
+════════════════════════════════ */
+.history-list{display:flex;flex-direction:column;gap:10px;}
+.history-card{
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  padding:14px;
+  box-shadow:var(--shadow);
+  border:1.5px solid var(--bg2);
+  cursor:pointer;transition:border-color .2s;
+}
+.history-card:hover{border-color:var(--purple-md);}
+.history-card-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.history-card-char{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--purple-md),var(--blue));
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;overflow:hidden;flex:0 0 28px;
+}
+.history-card-char img{width:100%;height:100%;object-fit:cover;}
+.history-card-info{flex:1;}
+.history-card-name{font-size:13px;font-weight:600;color:var(--ink);}
+.history-card-time{font-size:11px;color:var(--ink-lt);}
+.history-card-preview{font-size:13px;color:var(--ink-mid);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.history-card-recipe{font-size:11px;color:var(--purple-dk);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.history-card-del{
+  border:none;background:none;cursor:pointer;
+  color:var(--ink-lt);font-size:16px;padding:4px;
+}
+
+/* 空态 */
+.empty-state{
+  text-align:center;padding:48px 24px;
+  color:var(--ink-lt);
+}
+.empty-state .icon{font-size:40px;margin-bottom:12px;}
+.empty-state p{font-size:14px;line-height:1.6;}
+
+/* 渐入动画 */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.bubble-row{animation:fadeUp .25s ease;}
+
+/* 滚动条 */
+::-webkit-scrollbar{width:0;}
+</style>
+</head>
+<body>
+
+<!-- 顶栏 -->
+<div class="topbar">
+  <span class="topbar-title">独家特调</span>
+  <div class="topbar-tab">
+    <button class="active" onclick="switchTab('recipe')" id="tab-recipe">配方</button>
+    <button onclick="switchTab('chat')" id="tab-chat">对话</button>
+    <button onclick="switchTab('history')" id="tab-history">记录</button>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- ══ 配方页 ══ -->
+  <div class="page active" id="page-recipe">
+
+    <div class="section-label">选择角色</div>
+    <div class="char-row" id="char-row">
+      <div class="empty-state" style="padding:16px 0;text-align:left;">
+        <p style="font-size:13px;">加载中…</p>
+      </div>
+    </div>
+
+    <div class="section-label">当前配方</div>
+    <div class="recipe-card">
+      <textarea id="recipe-input" rows="4" placeholder="在这里写你的配方：场景设定、风格指令、角色扮演规则……&#10;&#10;例：你是一家深夜酒吧的调酒师，回答要带点诗意，每次结尾附上今日推荐酒单。"></textarea>
+      <div class="recipe-actions">
+        <button class="btn-sm btn-primary" onclick="saveRecipe()">保存配方</button>
+        <button class="btn-sm btn-ghost" onclick="clearRecipe()">清空</button>
+        <button class="btn-sm btn-accent" onclick="goChat()">▶ 开始调酿</button>
+      </div>
+    </div>
+
+    <div class="section-label">已保存配方</div>
+    <div class="saved-list" id="saved-list">
+      <div class="empty-state" style="padding:12px 0;">
+        <p style="font-size:13px;color:var(--ink-lt);">还没有保存的配方</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ 对话页 ══ -->
+  <div class="page" id="page-chat">
+    <div class="chat-wrap">
+      <div class="brew-status" id="brew-status">
+        <div class="brew-status-dot"></div>
+        <span class="brew-status-text" id="brew-status-text">请先在配方页选择角色和配方</span>
+        <button class="brew-status-btn" onclick="switchTab('recipe')">去配方</button>
+      </div>
+      <div class="chat-actions-bar">
+        <button class="btn-sm btn-ghost" onclick="clearChat()">清空对话</button>
+        <button class="btn-sm btn-accent" onclick="sendToChat()">发送到聊天室</button>
+      </div>
+      <div class="messages" id="messages"></div>
+    </div>
+  </div>
+
+  <!-- ══ 记录页 ══ -->
+  <div class="page" id="page-history">
+    <div class="section-label">历史对话</div>
+    <div class="history-list" id="history-list"></div>
+  </div>
+
+</div>
+
+<!-- 对话输入栏 -->
+<div class="chat-input-bar" id="chat-input-bar" style="display:none;">
+  <div class="chat-input-inner">
+    <textarea id="chat-input" placeholder="输入你的话…" rows="1"
+      oninput="autoResize(this)" onkeydown="chatKeydown(event)"></textarea>
+    <button class="send-btn" id="send-btn" onclick="sendMsg()">↑</button>
+  </div>
+</div>
+
+<script>
+const api = window.AiPhone;
+
+// ── 状态 ──
+let selectedCharId = null;
+let selectedCharName = '';
+let selectedCharAvatar = null;
+let currentRecipe = '';
+let messages = [];          // { role, content, createdAt }
+let isGenerating = false;
+let sessionId = null;       // 本次调酿会话 id（用于保存历史）
+
+// ── 工具 ──
+function ts(){ return new Date().toISOString(); }
+function fmtTime(iso){
+  const d = new Date(iso);
+  const h = d.getHours().toString().padStart(2,'0');
+  const m = d.getMinutes().toString().padStart(2,'0');
+  return h + ':' + m;
+}
+function fmtDate(iso){
+  const d = new Date(iso);
+  return (d.getMonth()+1)+'月'+d.getDate()+'日 '+fmtTime(iso);
+}
+function newId(){ return 'brew_'+Date.now()+'_'+Math.random().toString(36).slice(2,7); }
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,100)+'px';
+}
+
+// ── 页面切换 ──
+function switchTab(tab){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.topbar-tab button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('chat-input-bar').style.display = tab==='chat' ? 'block' : 'none';
+  if(tab==='chat') setTimeout(scrollToBottom,100);
+  if(tab==='history') loadHistory();
+}
+
+// ── 角色加载 ──
+async function loadChars(){
+  try {
+    const list = await api.characters.list();
+    const row = document.getElementById('char-row');
+    if(!list || !list.length){
+      row.innerHTML='<div style="padding:12px 0;font-size:13px;color:var(--ink-lt);">还没有角色，请先创建角色</div>';
+      return;
+    }
+    row.innerHTML = list.map(c=>{
+      const av = c.avatar
+        ? `<img src="${c.avatar}" alt="${c.name}">`
+        : (c.name?.[0]||'?');
+      return `<div class="char-chip" id="chip-${c.id}" onclick="selectChar('${c.id}','${(c.name||'').replace(/'/g,"\\'")}','${c.avatar||''}')">
+        <div class="char-avatar">${av}</div>
+        <div class="char-name">${c.name||'未命名'}</div>
+      </div>`;
+    }).join('');
+    // 恢复上次选择
+    const saved = localStorage.getItem('brew_char');
+    if(saved){
+      const c = list.find(x=>x.id===saved);
+      if(c) selectChar(c.id, c.name||'', c.avatar||'');
+    }
+  } catch(e){
+    console.error(e);
+  }
+}
+
+function selectChar(id, name, avatar){
+  selectedCharId = id;
+  selectedCharName = name;
+  selectedCharAvatar = avatar;
+  localStorage.setItem('brew_char', id);
+  document.querySelectorAll('.char-chip').forEach(el=>el.classList.remove('selected'));
+  const chip = document.getElementById('chip-'+id);
+  if(chip) chip.classList.add('selected');
+  updateBrewStatus();
+}
+
+// ── 配方 ──
+function saveRecipe(){
+  const text = document.getElementById('recipe-input').value.trim();
+  if(!text){ api.ui.toast('配方不能为空'); return; }
+  const list = loadRecipeList();
+  const item = { id: newId(), text, createdAt: ts() };
+  list.unshift(item);
+  localStorage.setItem('brew_recipes', JSON.stringify(list.slice(0,20)));
+  currentRecipe = text;
+  localStorage.setItem('brew_current_recipe', text);
+  renderSavedList();
+  updateBrewStatus();
+  api.ui.toast('配方已保存');
+}
+
+function clearRecipe(){
+  document.getElementById('recipe-input').value='';
+}
+
+function loadRecipeList(){
+  try{ return JSON.parse(localStorage.getItem('brew_recipes')||'[]'); }
+  catch{ return []; }
+}
+
+function renderSavedList(){
+  const list = loadRecipeList();
+  const el = document.getElementById('saved-list');
+  if(!list.length){
+    el.innerHTML='<div class="empty-state" style="padding:12px 0;"><p style="font-size:13px;color:var(--ink-lt);">还没有保存的配方</p></div>';
+    return;
+  }
+  el.innerHTML = list.map(item=>`
+    <div class="saved-item ${item.text===currentRecipe?'active-recipe':''}" onclick="useRecipe('${item.id}')">
+      <div class="saved-item-dot"></div>
+      <div class="saved-item-text">${item.text.replace(/</g,'&lt;')}</div>
+      <button class="saved-item-del" onclick="event.stopPropagation();delRecipe('${item.id}')">×</button>
+    </div>
+  `).join('');
+}
+
+function useRecipe(id){
+  const list = loadRecipeList();
+  const item = list.find(x=>x.id===id);
+  if(!item) return;
+  document.getElementById('recipe-input').value = item.text;
+  currentRecipe = item.text;
+  localStorage.setItem('brew_current_recipe', item.text);
+  renderSavedList();
+  updateBrewStatus();
+}
+
+function delRecipe(id){
+  const list = loadRecipeList().filter(x=>x.id!==id);
+  localStorage.setItem('brew_recipes', JSON.stringify(list));
+  renderSavedList();
+}
+
+function goChat(){
+  const text = document.getElementById('recipe-input').value.trim();
+  if(text){ currentRecipe=text; localStorage.setItem('brew_current_recipe',text); }
+  if(!selectedCharId){ api.ui.toast('请先选择角色'); return; }
+  updateBrewStatus();
+  switchTab('chat');
+}
+
+// ── 状态条 ──
+function updateBrewStatus(){
+  const el = document.getElementById('brew-status-text');
+  if(!selectedCharId){
+    el.textContent='请先在配方页选择角色';
+    document.getElementById('brew-status').querySelector('.brew-status-btn').textContent='去选角色';
+    return;
+  }
+  const recipe = currentRecipe||localStorage.getItem('brew_current_recipe')||'';
+  const short = recipe.length>30 ? recipe.slice(0,30)+'…' : recipe;
+  el.textContent = selectedCharName + (short?' · '+short:'');
+  document.getElementById('brew-status').querySelector('.brew-status-btn').textContent='换配方';
+}
+
+// ── 对话 ──
+function scrollToBottom(){
+  const msgs = document.getElementById('messages');
+  if(msgs) msgs.scrollIntoView({block:'end',behavior:'smooth'});
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function avatarHtml(cls, avatar, name, isUser){
+  if(isUser) return `<div class="bubble-avatar user-av">你</div>`;
+  if(avatar && avatar!=='') return `<div class="bubble-avatar ${cls}"><img src="${avatar}"></div>`;
+  return `<div class="bubble-avatar ${cls}">${(name||'?')[0]}</div>`;
+}
+
+function renderMessages(){
+  const el = document.getElementById('messages');
+  if(!messages.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">🍹</div><p>配方已就绪<br>输入你的第一句话，开始调酿</p></div>';
+    return;
+  }
+  el.innerHTML = messages.map(m=>{
+    if(m.role==='system'){
+      return `<div class="bubble-row"><div class="bubble system">${m.content.replace(/</g,'&lt;')}</div></div>`;
+    }
+    const isUser = m.role==='user';
+    const av = isUser
+      ? avatarHtml('user-av', null, null, true)
+      : avatarHtml('', selectedCharAvatar, selectedCharName, false);
+    const bubbleCls = isUser ? 'user' : 'char';
+    const content = m.content.replace(/</g,'&lt;').replace(/\n/g,'<br>');
+    return `<div class="bubble-row ${isUser?'user':''}">
+      ${!isUser?av:''}
+      <div>
+        <div class="bubble ${bubbleCls}">${content}</div>
+        <div class="bubble-time">${fmtTime(m.createdAt)}</div>
+      </div>
+      ${isUser?av:''}
+    </div>`;
+  }).join('');
+  setTimeout(scrollToBottom, 50);
+}
+
+function appendTyping(){
+  const el = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className='bubble-row';
+  div.id='typing-row';
+  const av = avatarHtml('', selectedCharAvatar, selectedCharName, false);
+  div.innerHTML=`${av}<div class="bubble char"><div class="typing-dot"><span></span><span></span><span></span></div></div>`;
+  el.appendChild(div);
+  setTimeout(scrollToBottom,50);
+}
+function removeTyping(){
+  const t = document.getElementById('typing-row');
+  if(t) t.remove();
+}
+
+function chatKeydown(e){
+  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMsg(); }
+}
+
+async function sendMsg(){
+  if(isGenerating) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  if(!selectedCharId){ api.ui.toast('请先在配方页选择角色'); switchTab('recipe'); return; }
+
+  input.value=''; input.style.height='auto';
+  document.getElementById('send-btn').disabled=true;
+  isGenerating=true;
+
+  const userMsg = { role:'user', content:text, createdAt:ts() };
+  messages.push(userMsg);
+  renderMessages();
+  appendTyping();
+
+  try {
+    const recipe = currentRecipe||localStorage.getItem('brew_current_recipe')||'';
+    const result = await api.ai.generate({
+      characterId: selectedCharId,
+      appTags: ['brew', 'chat'],
+      messages: messages.slice(-20).map(m=>({ role:m.role==='user'?'user':'assistant', content:m.content, createdAt:m.createdAt })),
+      instruction: recipe
+        ? `【配方指令】\n${recipe}\n\n请严格按照配方指令的风格和规则回复用户本轮的话。只输出角色这一轮的回复，不加任何注释。`
+        : '请以角色身份自然地回复用户。只输出本轮回复。'
+    });
+    removeTyping();
+    const charMsg = { role:'assistant', content:result.text||'（无回复）', createdAt:ts() };
+    messages.push(charMsg);
+    renderMessages();
+  } catch(e){
+    removeTyping();
+    const errMsg = { role:'system', content:'生成失败：'+(e?.message||'未知错误'), createdAt:ts() };
+    messages.push(errMsg);
+    renderMessages();
+  }
+
+  isGenerating=false;
+  document.getElementById('send-btn').disabled=false;
+}
+
+function clearChat(){
+  if(!messages.length) return;
+  // 保存当前会话到历史
+  if(messages.filter(m=>m.role!=='system').length>0) archiveSession();
+  messages=[];
+  sessionId=null;
+  renderMessages();
+}
+
+// ── 发送到聊天室 ──
+async function sendToChat(){
+  if(!selectedCharId){ api.ui.toast('未选择角色'); return; }
+  const userMsgs = messages.filter(m=>m.role!=='system');
+  if(!userMsgs.length){ api.ui.toast('对话为空'); return; }
+
+  try {
+    const recipe = currentRecipe||localStorage.getItem('brew_current_recipe')||'';
+    const shortRecipe = recipe.length>40 ? recipe.slice(0,40)+'…' : recipe;
+    const preview = userMsgs.slice(-2).map(m=>(m.role==='user'?'你：':'角色：')+m.content.slice(0,30)).join('\n');
+    const histText = userMsgs.map(m=>(m.role==='user'?'[用户]':'[角色]')+m.content).join('\n');
+
+    await api.chat.sendCard({
+      characterId: selectedCharId,
+      role: 'user',
+      summary: `独家特调对话片段`,
+      historyText: `[独家特调]\n配方：${shortRecipe}\n\n${histText}`,
+      card: {
+        appLabel: '独家特调',
+        title: '调酿记录',
+        subtitle: shortRecipe || '自由对话',
+        body: preview,
+        accentColor: '#B89AFF',
+        sections: [{
+          title: '最近消息',
+          rows: userMsgs.slice(-4).map(m=>({
+            label: m.role==='user'?'你':'角色',
+            value: m.content.slice(0,40)+(m.content.length>40?'…':'')
+          }))
+        }],
+        actions:[{label:'继续对话'}]
+      }
+    });
+    api.ui.toast('已发送到聊天室');
+  } catch(e){
+    api.ui.toast('发送失败：'+(e?.message||''));
+  }
+}
+
+// ── 历史归档 ──
+function archiveSession(){
+  if(!selectedCharId||!messages.length) return;
+  const userMsgs = messages.filter(m=>m.role!=='system');
+  if(!userMsgs.length) return;
+  const recipe = currentRecipe||localStorage.getItem('brew_current_recipe')||'';
+  const record = {
+    id: newId(),
+    charId: selectedCharId,
+    charName: selectedCharName,
+    charAvatar: selectedCharAvatar,
+    recipe,
+    messages: [...messages],
+    createdAt: messages[0]?.createdAt||ts(),
+    updatedAt: ts()
+  };
+  const list = loadHistoryList();
+  list.unshift(record);
+  try{
+    localStorage.setItem('brew_history', JSON.stringify(list.slice(0,30)));
+  }catch(e){
+    // 存满了就截短再试
+    localStorage.setItem('brew_history', JSON.stringify(list.slice(0,10)));
+  }
+}
+
+function loadHistoryList(){
+  try{ return JSON.parse(localStorage.getItem('brew_history')||'[]'); }
+  catch{ return []; }
+}
+
+function loadHistory(){
+  const list = loadHistoryList();
+  const el = document.getElementById('history-list');
+  if(!list.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">📜</div><p>还没有历史记录<br>完成一次对话后会自动保存</p></div>';
+    return;
+  }
+  el.innerHTML = list.map(item=>{
+    const av = item.charAvatar && item.charAvatar!==''
+      ? `<img src="${item.charAvatar}">`
+      : (item.charName?.[0]||'?');
+    const shortRecipe = (item.recipe||'').length>36 ? item.recipe.slice(0,36)+'…' : (item.recipe||'自由对话');
+    const userMsgs = (item.messages||[]).filter(m=>m.role!=='system');
+    const preview = userMsgs.slice(0,2).map(m=>(m.role==='user'?'你：':'角色：')+m.content.slice(0,24)).join(' / ');
+    return `<div class="history-card" onclick="restoreSession('${item.id}')">
+      <div class="history-card-header">
+        <div class="history-card-char">${av}</div>
+        <div class="history-card-info">
+          <div class="history-card-name">${item.charName||'未知角色'}</div>
+          <div class="history-card-time">${fmtDate(item.createdAt)} · ${userMsgs.length}条</div>
+        </div>
+        <button class="history-card-del" onclick="event.stopPropagation();delHistory('${item.id}')">×</button>
+      </div>
+      <div class="history-card-preview">${preview.replace(/</g,'&lt;')}</div>
+      <div class="history-card-recipe">📋 ${shortRecipe.replace(/</g,'&lt;')}</div>
+    </div>`;
+  }).join('');
+}
+
+function restoreSession(id){
+  const list = loadHistoryList();
+  const item = list.find(x=>x.id===id);
+  if(!item) return;
+  selectedCharId = item.charId;
+  selectedCharName = item.charName;
+  selectedCharAvatar = item.charAvatar;
+  currentRecipe = item.recipe||'';
+  messages = item.messages||[];
+  localStorage.setItem('brew_char', selectedCharId);
+  localStorage.setItem('brew_current_recipe', currentRecipe);
+  // 高亮角色 chip
+  document.querySelectorAll('.char-chip').forEach(el=>el.classList.remove('selected'));
+  const chip = document.getElementById('chip-'+selectedCharId);
+  if(chip) chip.classList.add('selected');
+  updateBrewStatus();
+  renderMessages();
+  switchTab('chat');
+}
+
+function delHistory(id){
+  const list = loadHistoryList().filter(x=>x.id!==id);
+  localStorage.setItem('brew_history', JSON.stringify(list));
+  loadHistory();
+}
+
+// ── 初始化 ──
+(async function init(){
+  // 读取上次配方
+  const saved = localStorage.getItem('brew_current_recipe');
+  if(saved){
+    currentRecipe = saved;
+    document.getElementById('recipe-input').value = saved;
+  }
+  renderSavedList();
+  renderMessages();
+  updateBrewStatus();
+  await loadChars();
+  updateBrewStatus();
+})();
+</script>
+</body>
+</html>
